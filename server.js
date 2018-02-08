@@ -1,24 +1,34 @@
 // Dependencies
 var express = require("express");
+var exphbs = require("express-handlebars");
 //get rid of mongojs??????????????
-var mongojs = require("mongojs");
+// var mongojs = require("mongojs");
 // Require request and cheerio. This makes the scraping possible
+var express = require("express");
+var bodyParser = require("body-parser");
 var request = require("request");
 var cheerio = require("cheerio");
 var mongoose = require("mongoose");
+var db = require("./models");
 
 // Initialize Express
 var app = express();
-
+app.use(bodyParser.json());
 // Database configuration
-var databaseUrl = "mongoHeadlines";
-var collections = ["scrapedData"];
-
-// Hook mongojs configuration to the db variable
-var db = mongojs(databaseUrl, collections);
-db.on("error", function(error) {
-  console.log("Database Error:", error);
+mongoose.Promise = Promise;
+mongoose.connect("mongodb://localhost/mongoHeadlines", {
+  useMongoClient: true
 });
+// var databaseUrl = "mongoHeadlines";
+// var collections = ["scrapedData"];
+//set up handlebars 
+app.engine("handlebars", exphbs({ defaultLayout: "main" }));
+app.set("view engine", "handlebars");
+// Hook mongojs configuration to the db variable
+// var db = mongojs(databaseUrl, collections);
+// db.on("error", function(error) {
+//   console.log("Database Error:", error);
+// });
 
 // Main route (simple Hello World Message)
 app.get("/", function(req, res) {
@@ -28,15 +38,45 @@ app.get("/", function(req, res) {
 // Retrieve data from the db
 app.get("/all", function(req, res) {
   // Find all results from the scrapedData collection in the db
-  db.scrapedData.find({}, function(error, data) {
+  db.Article.find({}, function(error, data) {
     // Throw any errors to the console
     if (error) {
       console.log(error);
     }
     // If there are no errors, send the data to the browser as json
     else {
+      // res.render("allArticles", {
+      //   data
+      // })
       res.json(data);
     }
+  });
+});
+
+// Retrieve article by id
+app.get("/all/:id", function(req, res){
+  db.Article.findOne({_id: req.params.id})
+  .populate("note")
+  .then(function(dbArticle){
+    res.json(dbArticle);
+  }).catch(function(err){
+    res.json(err);
+  });
+});
+
+app.post("/all/:id", function(req, res){
+  //console.log(req);
+  console.log(req.body);
+  db.Note
+  .create(req.body)
+  .then(function(dbNote){
+    return db.Article.findOneAndUpdate({ _id: req.params.id }, { note: dbNote._id }, { new: true });
+  })
+  .then(function(dbArticle){
+    res.json(dbArticle);
+  })
+  .catch(function(err){
+    res.json(err);
   });
 });
 
@@ -57,7 +97,7 @@ app.get("/scrape", function(req, res) {
       // If this found element had both a title and a link
       if (title && link) {
         // Insert the data in the scrapedData db
-        db.scrapedData.insert({
+        db.Article.create({
           title: title,
           link: link,
           excerpt: excerpt
@@ -89,3 +129,4 @@ app.get("/scrape", function(req, res) {
 app.listen(3000, function() {
   console.log("App running on port 3000!");
 });
+

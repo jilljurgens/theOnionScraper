@@ -4,7 +4,7 @@ var Schema = mongoose.Schema;
 var ArticleSchema = new Schema({
     title: String,    
     link: String,
-    excerpt: String
+    excerpt: String,
     // This allows us to populate the Article with an associated Note
     note: {
       type: Schema.Types.ObjectId,
