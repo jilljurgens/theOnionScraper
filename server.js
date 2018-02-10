@@ -28,12 +28,12 @@ app.engine("handlebars", exphbs({ defaultLayout: "main" }));
 app.set("view engine", "handlebars");
      
 // Main route (simple Hello World Message)
-app.get("/", function(req, res) {
-  res.send("Hello world");
-});
+// app.get("/", function(req, res) {
+//   res.send("/all");
+// });
 
 // Retrieve data from the db
-app.get("/all", function(req, res) {
+app.get("/", function(req, res) {
   // Find all results from the scrapedData collection in the db
   db.Article.find({}, function(error, data) {
 
