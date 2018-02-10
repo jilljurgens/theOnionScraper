@@ -28,12 +28,12 @@ app.engine("handlebars", exphbs({ defaultLayout: "main" }));
 app.set("view engine", "handlebars");
      
 // Main route (simple Hello World Message)
-// app.get("/", function(req, res) {
-//   res.send("/all");
-// });
+app.get("/", function(req, res) {
+  res.redirect("/all");
+});
 
 // Retrieve data from the db
-app.get("/", function(req, res) {
+app.get("/all", function(req, res) {
   // Find all results from the scrapedData collection in the db
   db.Article.find({}, function(error, data) {
 
@@ -137,7 +137,8 @@ app.get("/scrape", function(req, res) {
   });
 
   // Send a "Scrape Complete" message to the browser
-  res.send("Scrape Complete");
+  //try to add a success flash message here
+  res.redirect('/all');
 });
 // do a GET to display saved articles
 //do a GET to display the notes with an associated article
