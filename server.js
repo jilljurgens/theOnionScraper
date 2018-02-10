@@ -17,8 +17,8 @@ app.use(bodyParser.json());
 // Database configuration
 var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/mongoHeadlines";
 mongoose.Promise = Promise;
-mongoose.connect("mongodb://localhost/mongoHeadlines", {
-  //useMongoClient: true
+mongoose.connect(MONGODB_URI, {
+  useMongoClient: true
 });
 
 // var databaseUrl = "mongoHeadlines";
@@ -143,7 +143,8 @@ app.get("/scrape", function(req, res) {
 //do a GET to display the notes with an associated article
 
 // Listen on port 3000
-app.listen(3000, function() {
+var port = process.env.PORT || 3000
+app.listen(port, function() {
   console.log("App running on port 3000!");
 });
 
