@@ -1,6 +1,7 @@
 <h1>Onion Scrapes</h1>
 <div>
     {{#each articles}}
+
 		<div class = "row" style="padding: 30px">
 			<div class = "panel panel-default">
 				<div class = "panel-heading"><a href="{{link}}" target="_blank"><h3>{{title}}</a></h3> </div>
@@ -8,7 +9,9 @@
 				<!-- <p>{{excerpt}}</p> -->
 				
 			</div>
-			<!-- <button type="button" class="btn btn-primary note">Note</button>	 -->
+			<button type="button" class="btn btn-primary writeNote">Leave A Note</button>	
+		<!-- 	If a note exisits -->
+			<button type="button" class="btn btn-primary viewNote">View All Notes</button>	
 					
 
    		</div>

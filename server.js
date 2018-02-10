@@ -15,35 +15,18 @@ var db = require("./models");
 var app = express();
 app.use(bodyParser.json());
 // Database configuration
+var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/mongoHeadlines";
 mongoose.Promise = Promise;
 mongoose.connect("mongodb://localhost/mongoHeadlines", {
-  useMongoClient: true
+  //useMongoClient: true
 });
+
 // var databaseUrl = "mongoHeadlines";
 // var collections = ["scrapedData"];
 //set up handlebars 
 app.engine("handlebars", exphbs({ defaultLayout: "main" }));
 app.set("view engine", "handlebars");
-// Hook mongojs configuration to the db variable
-// var db = mongojs(databaseUrl, collections);
-// db.on("error", function(error) {
-//   console.log("Database Error:", error);
-// });
-      // var test = [
-      //   {body: "body test",
-      //   title: "title test",
-      //   excerpt: "excerpt test"
-      //   },
-      //   {
-      //   body: "body test2",
-      //   title: "title test2",
-      //   excerpt: "excerpt test2"
-      //   },{
-      //   body: "body test2",
-      //   title: "title test2",
-      //   excerpt: "excerpt test2"
-      //   }
-      //   ]
+     
 // Main route (simple Hello World Message)
 app.get("/", function(req, res) {
   res.send("Hello world");
@@ -53,32 +36,43 @@ app.get("/", function(req, res) {
 app.get("/all", function(req, res) {
   // Find all results from the scrapedData collection in the db
   db.Article.find({}, function(error, data) {
-    // Throw any errors to the console
-      // var articles = {
-      //   id: data._id,
-      //   title: data.title,
-      //   link: data.link,
-      //   excerpt: data.excerpt
-      // };
+
+      var wrapper  = {articles: data};
+
     if (error) {
       console.log(error);
     }
-    // If there are no errors, send the data to the browser as json
+
     else {
-      res.render("allArticles", data)
+      //console.log(wrapper);
+      res.render("allArticles", wrapper)
       };
       
-
-
-    
       //res.json(data);
-
       //console.log(data);
     });
   })
   // );
 // });
+// Retrieve SAVED articles from the db
+app.get("/saved", function(req, res) {
+  
+  db.Article.find({"saved": "true"}, function(error, data) {
 
+    var wrapper  = {articles: data};
+
+    if (error) {
+      console.log(error);
+    }
+
+    else {
+      //console.log(wrapper);
+      res.render("savedArticles", wrapper)
+      };
+      
+ 
+    });
+  })
 // Retrieve article by id
 app.get("/all/:id", function(req, res){
   db.Article.findOne({_id: req.params.id})
@@ -91,13 +85,14 @@ app.get("/all/:id", function(req, res){
 });
 
 app.post("/all/:id", function(req, res){
-  console.log(req.body);
+  //console.log(req.body);
   db.Note
   .create(req.body)
   .then(function(dbNote){
-    return db.Article.findOneAndUpdate({ _id: req.params.id }, { note: dbNote._id }, { new: true });
+    return db.Article.findOneAndUpdate({ _id: req.params.id }, { "note": dbNote._id }, { new: true });
   })
   .then(function(dbArticle){
+    //console.log(dbArticle);
     res.json(dbArticle);
   })
   .catch(function(err){
@@ -106,9 +101,10 @@ app.post("/all/:id", function(req, res){
 });
 
 
+
+
 // Scrape data from one site and place it into the mongodb db
 app.get("/scrape", function(req, res) {
-  // Make a request for the news section of ycombinator
   request("https://www.theonion.com/", function(error, response, html) {
     // Load the html body from request into cheerio
     var $ = cheerio.load(html);
@@ -118,7 +114,7 @@ app.get("/scrape", function(req, res) {
       var title = $(element).children("a").children("h3").text();
       var link = $(element).children("a").attr("href");
       var excerpt = $(element).children("p").text();
-
+ 
       // If this found element had both a title and a link
       if (title && link) {
         // Insert the data in the scrapedData db
@@ -143,7 +139,7 @@ app.get("/scrape", function(req, res) {
   // Send a "Scrape Complete" message to the browser
   res.send("Scrape Complete");
 });
-
+// do a GET to display saved articles
 //do a GET to display the notes with an associated article
 
 // Listen on port 3000

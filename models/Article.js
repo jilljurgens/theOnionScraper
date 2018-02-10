@@ -9,7 +9,11 @@ var ArticleSchema = new Schema({
     note: {
       type: Schema.Types.ObjectId,
       ref: "Note"
-    } 
+    },
+    saved: {
+    type: Boolean,
+    default: false
+  } 
 });
 
 // This creates our model from the above schema, using mongoose's model method
